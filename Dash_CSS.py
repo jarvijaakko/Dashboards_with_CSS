@@ -4,7 +4,7 @@ from pandas_datareader import data as pdr
 import dash
 import dash_core_components as dcc
 import dash_html_components as html
-from dash.dependencies import Output, Input
+from dash.dependencies import Output, Input, State
 import datetime
 from dateutil.relativedelta import relativedelta
 import plotly.graph_objs as go
@@ -19,13 +19,15 @@ external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 app = dash.Dash(__name__, external_stylesheets = external_stylesheets)
 
 app.layout = html.Div([
-	html.Div([dcc.Input(id = 'stock-input', value = 'SPY', type = 'text')
-		]),
-
 	html.Div([
 		html.H2('Stock app'),
 		html.Img(src = '/assets/Investing.jpeg')
 	], className = 'banner'),
+
+	html.Div([
+		dcc.Input(id = 'stock-input', value = 'SPY', type = 'text'),
+		html.Button(id = 'submit-button', n_clicks = 0, children = 'Submit')
+		]),
 
 		html.Div([
 			html.Div([
@@ -41,11 +43,12 @@ app.css.append_css({
 	'external_url' : 'https://codepen.io/chriddyp/pen/bWLwgP.css'
 })
 
-@app.callback(dash.dependencies.Output('graph_close', 'figure'),
-			 [dash.dependencies.Input('stock-input', 'value')]
+@app.callback(Output('graph_close', 'figure'),
+			 [Input('submit-button', 'n_clicks')],
+			 [State('stock-input', 'value')]
 			 )
 
-def update_fig(input_value):
+def update_fig(n_clicks, input_value):
 	df = pdr.get_data_yahoo(input_value, start, end)
 
 	data = []
