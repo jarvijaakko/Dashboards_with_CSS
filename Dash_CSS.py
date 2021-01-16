@@ -54,7 +54,7 @@ def generate_html_table(max_rows = 10):
 						for i in range(min(len(df), max_rows))
 					]
 				),
-				style = {'height' : '150px', 'overflowY' : 'scroll'},
+				style = {'height' : '300px', 'overflowY' : 'scroll'},
 			),
 		],
 		style = {'height' : '100%'},)
@@ -103,15 +103,96 @@ def update_fig(n_clicks, input_value):
 	df = pdr.get_data_yahoo(input_value, start, end)
 
 	data = []
-	trace_close = go.Scatter(x = list(df.index),
+	trace_line = go.Scatter(x = list(df.index),
 							 y = list(df.Close),
 							 name='Close',
 							 line=dict(color = 'red')
 							 )
 
-	data.append(trace_close)
+	trace_candle = go.Candlestick(x = df.index,
+							 open = df.Open,
+							 high = df.High,
+							 low = df.Low,
+							 close = df.Close,
+							 visible = False,
+							 name='Close',
+							 showlegend = False
+							 )
 
-	layout = {'title' : input_value}
+	trace_bar = go.Ohlc(x = df.index,
+							 open = df.Open,
+							 high = df.High,
+							 low = df.Low,
+							 close = df.Close,
+							 visible = False,
+							 name='Close',
+							 showlegend = False
+							 )
+
+
+
+	data = [trace_line, trace_candle, trace_bar]
+
+	updatemenus = list([
+		dict(
+			buttons = list([
+				dict(
+					args=[{'visible' : [True, False, False]}],
+					label = 'Line',
+					method = 'update'
+				),
+				dict(
+					args=[{'visible' : [False, True, False]}],
+					label = 'Candle',
+					method = 'update'
+				),
+				dict(
+					args=[{'visible' : [False, False, True]}],
+					label = 'Bar',
+					method = 'update'
+				)
+
+			]),
+			direction = 'down',
+			pad = {'r' : 10, 't' : 10},
+			x = 0,
+			xanchor = 'left',
+			y = 1.05,
+			yanchor = 'top'
+		)
+	])
+
+
+	layout = dict(title = input_value,
+				  updatemenus = updatemenus,
+				  autosize = False,
+				  xaxis = dict(
+					rangeselector=dict(
+			            buttons=list([
+			                dict(count=1,
+			                     label="1m",
+			                     step="month",
+			                     stepmode="backward"),
+			                dict(count=6,
+			                     label="6m",
+			                     step="month",
+			                     stepmode="backward"),
+			                dict(count=1,
+			                     label="YTD",
+			                     step="year",
+			                     stepmode="todate"),
+			                dict(count=1,
+			                     label="1y",
+			                     step="year",
+			                     stepmode="backward"),
+			                dict(step="all")
+            		])
+    			),
+        rangeslider=dict(
+			visible=True
+        )
+        			)
+  	)
 
 	return {
 		'data': data,
