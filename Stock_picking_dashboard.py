@@ -16,8 +16,6 @@ from iexfinance.stocks import get_historical_data
 import yfinance as yf
 yf.pdr_override()
 
-# Jeejee
-
 # Start and end dates
 start = datetime.datetime.today() - relativedelta(years=5)
 end = datetime.datetime.today()
