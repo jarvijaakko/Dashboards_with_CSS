@@ -16,9 +16,11 @@ from iexfinance.stocks import get_historical_data
 import yfinance as yf
 yf.pdr_override()
 
+# Start and end dates
 start = datetime.datetime.today() - relativedelta(years=5)
 end = datetime.datetime.today()
 
+# Function that updates financial market news
 def update_news():
 	url = 'https://cloud.iexapis.com/stable/stock/market/news/last/5?token=pk_9ed15be4e74b454d8436a2cc86c8254b&period=annual'
 	r = requests.get(url)
@@ -28,6 +30,7 @@ def update_news():
 	df = pd.DataFrame(df[['headline', 'url']])
 	return(df)
 
+# Function that generates the financial news table
 def generate_html_table(max_rows = 10):
 	df = update_news()
 
@@ -59,10 +62,13 @@ def generate_html_table(max_rows = 10):
 		],
 		style = {'height' : '100%'},)
 
+# Define the external CSS stylesheet to be used
 external_stylesheets = ['https://codepen.io/chriddyp/pen/bWLwgP.css']
 
+# Initiate the app
 app = dash.Dash(__name__, external_stylesheets = external_stylesheets)
 
+# App layout (everything that's visible on the app)
 app.layout = html.Div([
 	html.Div([
 		html.H2('Stock app'),
@@ -90,15 +96,18 @@ app.layout = html.Div([
 	],className = 'row')
 ])
 
+# Append the external CSS stylesheet
 app.css.append_css({
 	'external_url' : 'https://codepen.io/chriddyp/pen/bWLwgP.css'
 })
 
+# App callback (Stock input search bar)
 @app.callback(Output('graph_close', 'figure'),
 			 [Input('submit-button', 'n_clicks')],
 			 [State('stock-input', 'value')]
 			 )
 
+# This function updates the stock figure type (line / candle / bar)
 def update_fig(n_clicks, input_value):
 	df = pdr.get_data_yahoo(input_value, start, end)
 
@@ -133,6 +142,7 @@ def update_fig(n_clicks, input_value):
 
 	data = [trace_line, trace_candle, trace_bar]
 
+# Update figure drop-down menu
 	updatemenus = list([
 		dict(
 			buttons = list([
@@ -162,7 +172,7 @@ def update_fig(n_clicks, input_value):
 		)
 	])
 
-
+# Final graph layout
 	layout = dict(title = input_value,
 				  updatemenus = updatemenus,
 				  autosize = False,
@@ -193,12 +203,12 @@ def update_fig(n_clicks, input_value):
         )
         			)
   	)
-
+# The function returns data and layout for the plotly graph
 	return {
 		'data': data,
 		'layout': layout
 	}
 		
-
+# This section maintains the code running with debug mode
 if(__name__ == '__main__'):
 	app.run_server(debug=True)
